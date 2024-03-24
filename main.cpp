@@ -32,8 +32,6 @@
 
 using namespace std;
 
-ifstream fin ("test.in");
-ofstream fout ("test.out");
 
 class Exercitiu;
 class Bubble;
@@ -275,6 +273,9 @@ void start_antrenament(auto &listaExercitii){
 
 int main()
 {
+    ifstream fin ("test.in");
+    ofstream fout ("test.out");
+
     map<string, Exercitiu> listaExercitii; ///lista exercitiilor existente
 
     afisare_optiuni_0();
