@@ -1,5 +1,5 @@
 # Proiect-POO
-#Jurnal de antrenament
+# Jurnal de antrenament
 
 Am 3 clase:
     Antrenament: tine:
