@@ -24,3 +24,10 @@ The fitness.h header contains the workoutDiary namespace. Inside the workoutDiar
 - workout - a collection of multiple *exercise* instances; it is also characterized by a calendaristicDate
 - calendaristicDate - a class that holds information about a certain date (day, month, year); it also has built-in functions to verify the validity of a date along with overloaded operators
 
+## To-do list
+- port app to iOS for my own personal use
+- create a GUI
+- replace the .txt file with a database for storing information
+- export graphs about each exercise's progression in time
+- register/log-in module for multiple users
+- launch to app store?
