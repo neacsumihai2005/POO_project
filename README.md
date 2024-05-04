@@ -18,4 +18,14 @@ The program notifies the user when he hits a new PR with a console message.
 
 
 ## Technical details
+The fitness.h header contains the workoutDiary namespace. Inside the workoutDiary namespace we have 4 classes:
+- exerciseType
+- exercise
+- workout
+- calendaristicDate
+
+*exerciseType* is the base template for an exercise; it's the class that holds the name, description and PRs of a certain movement.
+*exercise* is characterized by an exerciseType, a weight integer and a set of reps performed with the weight.
+*workout* is a collection of multiple *exercise* instances; it is also characterized by a calendaristicDate
+*calendaristicDate* is a class that holds information about a certain date (day, month, year); it also has built-in functions to verify the validity of a date along with overloaded operators
 
