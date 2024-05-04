@@ -188,10 +188,10 @@ int main()
                 for(int times = 1; times <= indexToDelete - 1; times++){
                     iteratorToDelete++;
                 }
+                std::cout << "***" << iteratorToDelete -> first << " deleted succesfully!***" << "\n" << "\n";
                 delete iteratorToDelete -> second; ///free up memory
                 exerciseMap.erase(iteratorToDelete);
 
-                printAllExercises(std::cout, exerciseMap);
 
             }
             else if(userCurrentChoice == 2){
