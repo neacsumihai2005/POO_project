@@ -64,7 +64,8 @@ inline void menuNewWorkout(std::map<std::string, exerciseType*> &exerciseMap){
             if(userChoice == 'y'){
                 std::cout << "Description (one liner) = ";
                 std::string newDescription;
-                std:: cin >> newDescription;
+                std::cin.get();
+                std::getline(std::cin, newDescription);
                 currentExerciseType -> setDescription(newDescription);
             }
 
