@@ -8,3 +8,8 @@ Upon running the main.cpp, the console will output the current PRs for each reco
     4. input the reps of the exercise (an array of integers that ends with 0)
     5. jump to step (i)
 2. modify records
+    1. delete a certain exercise
+        1. user will be prompted with on-screen instructions
+    3. modify a certain PR manually
+        1. user will be prompted with on-screen instructions
+
