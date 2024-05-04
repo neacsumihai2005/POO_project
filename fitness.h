@@ -80,6 +80,12 @@ namespace workoutDiary{
                     }
                 }
             }
+            void operator = (exerciseType const &operand){
+                name = operand.name;
+                description = operand.description;
+                recordReps = operand.recordReps;
+            }
+
     };
 
     class exercise{
@@ -131,6 +137,16 @@ namespace workoutDiary{
                 listReps.push_back(reps);
             }
 
+            void operator = (exercise const &operand){
+                currentExerciseType = operand.currentExerciseType;
+                weight = operand.weight;
+
+
+                listReps.clear();
+                for(int i = 0; i < operand.listReps.size(); i++){
+                    listReps.push_back(operand.listReps[i]);
+                }
+            }
     };
 
     class calendaristicDate{
@@ -270,6 +286,15 @@ namespace workoutDiary{
 
             void insertExercise(exercise* newExercise){
                 listExercises.push_back(newExercise);
+            }
+
+            operator = (workout const &operand){
+                date = operand.date;
+
+                listExercises.clear();
+                for(int i = 0; i < operand.listExercises.size(); i++){
+                    listExercises.push_back(operand.listExercises[i]);
+                }
             }
     };
 }
