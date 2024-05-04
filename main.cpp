@@ -88,9 +88,10 @@ inline void menuNewWorkout(std::map<std::string, exerciseType*> &exerciseMap){
             int potentialPR = currentExerciseType -> getPR(weight);
 
             if(potentialPR > previousPR){
-                std::cout << "Congratulations! You just hit a PR!\n";
+                std::cout << "Congratulations! You just hit a PR! Old PR was " << previousPR << " reps!" << "\n";
             }
 
+            std::cout << "Reps = ";
             std::cin >> reps;
         }
 
@@ -242,7 +243,6 @@ int main()
     }
 
     fin.close();
-    printAllExercises(std::cout, exerciseMap);
 
     std::ofstream fout ("test.txt");
     outputExerciseMap(fout, exerciseMap);
