@@ -14,5 +14,5 @@ Upon running the main.cpp, the console will output the current PRs for each reco
         1. user will be prompted with on-screen instructions
 3. print current global PRs
 
-The program notifies the user when he hits a new PR.
+The program notifies the user when he hits a new PR with a console message.
 
