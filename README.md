@@ -12,4 +12,5 @@ Upon running the main.cpp, the console will output the current PRs for each reco
         1. user will be prompted with on-screen instructions
     3. modify a certain PR manually
         1. user will be prompted with on-screen instructions
+3. print current global PRs
 
