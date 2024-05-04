@@ -7,4 +7,4 @@ Upon running the main.cpp, the console will output the current PRs for each reco
     3. input the weight for the exercise (kg) (integer)
     4. input the reps of the exercise (an array of integers that ends with 0)
     5. jump to step (i)
-2. modify the current list of exercises
+2. modify records
