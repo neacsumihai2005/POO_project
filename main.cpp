@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <assert.h>
 
 #include "fitness.h"
 
@@ -28,79 +29,91 @@ void printAllExercises(std::ostream & out, std::map<std::string, exerciseType*> 
     }
 }
 
-inline void menuNewWorkout(std::map<std::string, exerciseType*> &exerciseMap){
-    std::cout << "Day = "; int day; std::cin >> day;
-    std::cout << "Month = "; int month; std::cin >> month;
-    std::cout << "Year = "; int year; std::cin >> year;
+inline void menuNewWorkout(std::istream& in, std::map<std::string, exerciseType*> &exerciseMap){
+    calendaristicDate currentDate;
+    std::cin >> currentDate;
 
-    if(!(calendaristicDate(day, month, year).validDate())){
-        throw(std::runtime_error("Invalid date!"));
-    }
+    try{
+        if( currentDate.validDate() ){
+            std::cout << "!!Type \"stop\" in the Exercise box in order to end the workout!!" << "\n";
+            workout* temp = new workout(currentDate);
 
-    std::cout << "!!Type \"stop\" in the Exercise box in order to end the workout!!" << "\n";
-    workout* temp = new workout(calendaristicDate(day, month, year));
+            std::cout << "Exercise = ";
+            std::string currentExerciseName;
+            std::cin >> currentExerciseName;
 
-    std::cout << "Exercise = ";
-    std::string currentExerciseName;
-    std::cin >> currentExerciseName;
+            while(currentExerciseName != "stop"){
+                exercise * currentExercise = new exercise();
+                exerciseType * currentExerciseType;
 
-    while(currentExerciseName != "stop"){
-        exercise * currentExercise = new exercise();
-        exerciseType * currentExerciseType;
+                ///this might be a new exercise, so we verify that
+                if(exerciseMap.find(currentExerciseName) == exerciseMap.end()){
+                    currentExerciseType = new exerciseType(currentExerciseName);
+                    exerciseMap[currentExerciseName] = currentExerciseType;
 
-        ///this might be a new exercise, so we verify that
-        if(exerciseMap.find(currentExerciseName) == exerciseMap.end()){
-            currentExerciseType = new exerciseType(currentExerciseName);
-            exerciseMap[currentExerciseName] = currentExerciseType;
+                    std::cout << "New exercise detected!" << "\n";
+                    std::cout << "Would you like to add a description? (y/n)" << "\n";
 
-            std::cout << "New exercise detected!" << "\n";
-            std::cout << "Would you like to add a description? (y/n)" << "\n";
+                    char userChoice;
+                    std::cin >> userChoice;
+                    if( !(userChoice == 'n' || userChoice == 'y') ){
+                        throw(std::runtime_error("Invalid choice!"));
+                    }
+                    if(userChoice == 'y'){
+                        std::cout << "Description (one liner) = ";
+                        std::string newDescription;
+                        std::cin.get();
+                        std::getline(std::cin, newDescription);
+                        currentExerciseType -> setDescription(newDescription);
+                    }
 
-            char userChoice;
-            std::cin >> userChoice;
-            if( !(userChoice == 'n' || userChoice == 'y') ){
-                throw(std::runtime_error("Invalid choice!"));
+                }
+                else {
+                    currentExerciseType = exerciseMap[currentExerciseName];
+                }
+
+                std::cout << "Weight (kg) = ";
+                int weight;
+                std::cin >> weight;
+                assert(weight > 0);
+                currentExercise -> setWeight(weight);
+
+                std::cout << "Reps = ";
+                int reps;
+                std::cin >> reps;
+                assert(reps > 0);
+                while(reps != 0){
+                    currentExercise -> addSet(reps);
+
+                    int previousPR = currentExerciseType -> getPR(weight);
+                    currentExerciseType -> tryUpdatePR(weight, reps);
+                    int potentialPR = currentExerciseType -> getPR(weight);
+
+                    if(potentialPR > previousPR){
+                        std::cout << "Congratulations! You just hit a PR! Old PR was " << previousPR << " reps!" << "\n";
+                    }
+
+                    std::cout << "Reps = ";
+                    std::cin >> reps;
+                    assert(reps > 0);
+                }
+
+                std::cout << "Exercise = ";
+                std::cin >> currentExerciseName;
             }
-            if(userChoice == 'y'){
-                std::cout << "Description (one liner) = ";
-                std::string newDescription;
-                std::cin.get();
-                std::getline(std::cin, newDescription);
-                currentExerciseType -> setDescription(newDescription);
-            }
 
+            std::cout << "Workout ended! Congratulations!" << "\n" << "\n";
         }
         else {
-            currentExerciseType = exerciseMap[currentExerciseName];
+            exceptionDate mce;
+            throw(mce);
         }
-
-        std::cout << "Weight (kg) = ";
-        int weight;
-        std::cin >> weight; currentExercise -> setWeight(weight);
-
-        std::cout << "Reps = ";
-        int reps;
-        std::cin >> reps;
-        while(reps != 0){
-            currentExercise -> addSet(reps);
-
-            int previousPR = currentExerciseType -> getPR(weight);
-            currentExerciseType -> tryUpdatePR(weight, reps);
-            int potentialPR = currentExerciseType -> getPR(weight);
-
-            if(potentialPR > previousPR){
-                std::cout << "Congratulations! You just hit a PR! Old PR was " << previousPR << " reps!" << "\n";
-            }
-
-            std::cout << "Reps = ";
-            std::cin >> reps;
-        }
-
-        std::cout << "Exercise = ";
-        std::cin >> currentExerciseName;
+    }
+    catch(exceptionDate mce){
+        std::cout << mce.what() << "\n";
+        return;
     }
 
-    std::cout << "Workout ended! Congratulations!" << "\n" << "\n";
 }
 
 void getExerciseMap(std::istream &in, std::map<std::string, exerciseType*> &exerciseMap){
@@ -165,7 +178,7 @@ int main()
     while(userCurrentChoice == 1 || userCurrentChoice == 2 || userCurrentChoice == 3){
         if(userCurrentChoice == 1){
             ///start a new workout
-            menuNewWorkout(exerciseMap);
+            menuNewWorkout(std::cin, exerciseMap);
         }
         else if(userCurrentChoice == 2){
             ///modify records

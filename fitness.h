@@ -2,8 +2,16 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <exception>
 
 namespace workoutDiary{
+
+    class exceptionDate : public std::exception{
+        public:
+            char * what(){
+                return "Invalid Date! Try again.";
+            }
+    };
 
     class exerciseType{
         private:
@@ -200,6 +208,15 @@ namespace workoutDiary{
                 } out << X.month;
                 out << "/";
                 out << X.year;
+
+                return out;
+            }
+            friend std::istream& operator >> (std::istream& in, calendaristicDate & X){
+                std::cout << "Day = "; in >> X.day;
+                std::cout << "Month = "; in >> X.month;
+                std::cout << "Year = "; in >> X.year;
+
+                return in;
             }
             bool leapYear(){
                 if (year % 400 == 0) {
