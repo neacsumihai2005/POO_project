@@ -5,12 +5,55 @@
 #include <exception>
 
 namespace workoutDiary{
-
+    ///exceptions
     class exceptionDate : public std::exception{
         public:
             char * what(){
                 return "Invalid Date! Try again.";
             }
+    };
+
+    ///the rest
+    class Person{
+        private:
+            std::string name;
+        public:
+            Person() = default;
+
+            Person(std::string newName){
+                name = newName;
+            }
+
+            friend std::ostream& operator << (std::ostream& out, const Person& X){
+                out << X.name;
+                return out;
+            }
+            friend std::istream& operator >> (std::istream& in, Person& X){
+                in >> X.name;
+                return in;
+            }
+    };
+
+    class Client : public Person{
+        private:
+            int id;
+        public:
+            Client() = default;
+            Client(std::string newName, int newId) : Person(newName), id(newId){}
+
+            friend std::ostream& operator << (std::ostream& out, const Client & X){
+                out << static_cast<const Person&> (X);
+                out << ' ';
+                out << X.id;
+                return out;
+            }
+            friend std::istream& operator >> (std::istream& in, Client & X){
+                in >> static_cast<Person&>(X);
+                in >> X.id;
+
+                return in;
+            }
+
     };
 
     class exerciseType{

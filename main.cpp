@@ -116,6 +116,14 @@ inline void menuNewWorkout(std::istream& in, std::map<std::string, exerciseType*
 
 }
 
+void getClientsList(std::istream &in, std::vector<Client> &clients){
+    clients.clear();
+    Client newClient;
+    while(in >> newClient){
+        clients.push_back(newClient);
+    }
+}
+
 void getExerciseMap(std::istream &in, std::map<std::string, exerciseType*> &exerciseMap){
     std::string currentExerciseName;
     while(in >> currentExerciseName){
@@ -139,6 +147,12 @@ void getExerciseMap(std::istream &in, std::map<std::string, exerciseType*> &exer
     }
 }
 
+void outputClientsList(std::ostream& out, std::vector<Client> clients){
+    for(int i = 0; i < clients.size(); i++){
+        out << clients[i] << "\n";
+    }
+}
+
 void outputExerciseMap(std::ostream& out, std::map<std::string, exerciseType*> const & exerciseMap){
     for (auto it : exerciseMap){
         out << (it.second) -> getName() << "\n";
@@ -148,6 +162,12 @@ void outputExerciseMap(std::ostream& out, std::map<std::string, exerciseType*> c
 
 int main()
 {
+    std::ifstream finClients("clients.txt");
+    std::vector<Client> clients;
+    getClientsList(finClients, clients);
+    finClients.close();
+
+
     std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << "\n";
     std::cout << "!!Disclaimer: please use the singular form for each exercise         !!" << "\n";
     std::cout << "!!For example: \"dip\" and \"dips\" are registered as different exercises!!" << "\n";
@@ -156,11 +176,11 @@ int main()
 
     int userCurrentChoice = 0;
     ///cute little menu implementation
-    std::ifstream fin ("test.txt");
+    std::ifstream finExercises ("exercises.txt");
     ///updateInput(fin);
 
     std::map<std::string, exerciseType*> exerciseMap;
-    getExerciseMap(fin, exerciseMap);
+    getExerciseMap(finExercises, exerciseMap);
 
     ///std::cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" << "\n";
     std::cout << "Here are your current lifetime records:" << "\n";
@@ -256,10 +276,15 @@ int main()
         std::cin >> userCurrentChoice;
     }
 
-    fin.close();
+    finExercises.close();
 
-    std::ofstream fout ("test.txt");
-    outputExerciseMap(fout, exerciseMap);
+    std::ofstream foutExercises ("exercises.txt");
+    outputExerciseMap(foutExercises, exerciseMap);
+    foutExercises.close();
 
+
+    std::ofstream foutClients("clients.txt");
+    outputClientsList(foutClients, clients);
+    foutClients.close();
     return 0;
 }
