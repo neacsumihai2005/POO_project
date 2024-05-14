@@ -19,9 +19,11 @@ namespace workoutDiary{
     class Person{
         private:
             static int numberOfPersons;
+        protected:
             std::string name;
         public:
             Person() = default;
+            virtual ~Person() {} ///For the polymorphic deletion
 
             Person(std::string newName){
                 name = newName;
@@ -44,6 +46,9 @@ namespace workoutDiary{
                 return numberOfPersons;
             }
 
+            virtual void setPassword(const std::string &newPassword) = 0;
+            virtual std::string getPassword() const = 0;
+
             friend std::ostream& operator << (std::ostream& out, const Person& X){
                 out << X.name;
                 return out;
@@ -52,13 +57,16 @@ namespace workoutDiary{
                 in >> X.name;
                 return in;
             }
+        protected:
+            void outputName(std::ostream& out) const{
+                out << name;
+            }
     };
     int Person::numberOfPersons = 0;
 
     class Client : public Person{
         private:
             std::string password;
-            static int testID;
         public:
             Client() = default;
             Client(std::string newName) : Person(newName) {}
@@ -67,11 +75,11 @@ namespace workoutDiary{
             std::string getName(){
                 return static_cast<Person&> (*this).getName();
             }
-            std::string getPassword(){
-                return password;
-            }
-            void setPassword(std::string newPassword){
+            virtual void setPassword(const std::string& newPassword) override{
                 password = newPassword;
+            }
+            virtual std::string getPassword() const override {
+                return password;
             }
 
             friend std::ostream& operator << (std::ostream& out, const Client & X){
@@ -85,12 +93,13 @@ namespace workoutDiary{
                 return in;
             }
 
-            static int returnTestID(){
-                return testID;
+            void outputCredentials(std::ostream& out) const{
+                outputName(out);
+                out << ' ' ;
+                out << password;
             }
 
     };
-    int Client::testID = 0;
 
     class exerciseType{
         private:

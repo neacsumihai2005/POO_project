@@ -166,7 +166,7 @@ void getExerciseMap(std::istream &in, std::map<std::string, exerciseType*> &exer
 
 void outputClientsLogs(std::ostream& out, std::vector<Client> clients){
     for(int i = 0; i < clients.size(); i++){
-        out << clients[i].getName() << ' ' << clients[i].getPassword() << "\n";
+        clients[i].outputCredentials(out); out << "\n";
     }
 }
 
