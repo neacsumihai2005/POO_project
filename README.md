@@ -1,6 +1,6 @@
 # Training Log App
 
-Upon running the main.cpp, the user will be prompted with a login screen. If the username is not found in the current users list, a new user will be created. After login, the console will output the current PRs for each recorded exercise. These PRs will be gathered from *exercises.txt* at the start of the program, for each user, even if it is not the one who logged in (this helps keep the *exercises.txt* file intact after updating), and *exercises.txt* will be updated when the program stops. An user menu will pop up with on-screen instructions. This menu includes the following options:
+Upon running the main.cpp, the user will be prompted with a message of the day that changes depending on the current system time and showcases the concept of Upcasting. There is also a login screen. If the username is not found in the current users list, a new user will be created. After login, the console will output the current PRs for each recorded exercise. These PRs will be gathered from *exercises.txt* at the start of the program, for each user, even if it is not the one who logged in (this helps keep the *exercises.txt* file intact after updating), and *exercises.txt* will be updated when the program stops. An user menu will pop up with on-screen instructions. This menu includes the following options:
 1. start a new workout (and enther the following loop:)
     1. input an exercise's name (unique string); exit loop if input = "stop"
         1. if the exercise doesn't yet exist in the list, it will be inserted
