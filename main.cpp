@@ -1,16 +1,18 @@
 #include <iostream>
 #include <fstream>
 #include <assert.h>
+#include <exception>
 
 #include "fitness.h"
 
 using namespace workoutDiary;
 
+
 inline void printMainScreenOptions(std::ostream & out){
     out << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << "\n";
     out << "~ 1 = start a new workout           ~" << "\n";
     out << "~ 2 = modify records                ~" << "\n";
-    out << "~ 3 = print current global PRs      ~" << "\n";
+    out << "~ 3 = print current personal PRs    ~" << "\n";
     out << "~ other number = exit               ~" << "\n";
     out << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << "\n";
 }
@@ -51,8 +53,8 @@ inline void menuNewWorkout(std::istream& in, std::map<std::string, exerciseType*
                     currentExerciseType = new exerciseType(currentExerciseName);
                     exerciseMap[currentExerciseName] = currentExerciseType;
 
-                    std::cout << "New exercise detected!" << "\n";
-                    std::cout << "Would you like to add a description? (y/n)" << "\n";
+                    std::cout << "New exercise for you detected!" << "\n";
+                    std::cout << "Would you like to add a personal description? (y/n)" << "\n";
 
                     char userChoice;
                     std::cin >> userChoice;
@@ -95,7 +97,7 @@ inline void menuNewWorkout(std::istream& in, std::map<std::string, exerciseType*
 
                     std::cout << "Reps = ";
                     std::cin >> reps;
-                    assert(reps > 0);
+                    assert(reps >= 0);
                 }
 
                 std::cout << "Exercise = ";
@@ -120,13 +122,28 @@ void getClientsList(std::istream &in, std::vector<Client> &clients){
     clients.clear();
     Client newClient;
     while(in >> newClient){
+        Person::incNumberOfPersons();
         clients.push_back(newClient);
     }
 }
 
-void getExerciseMap(std::istream &in, std::map<std::string, exerciseType*> &exerciseMap){
-    std::string currentExerciseName;
-    while(in >> currentExerciseName){
+void getExerciseMap(std::istream &in, std::map<std::string, exerciseType*> &exerciseMap, std::string username){
+    std::string currentUsername;
+    in >> currentUsername;
+    while(currentUsername != username){
+        in >> currentUsername;
+    }
+    if(currentUsername != username){
+        std::cout << "No exercises found!" << "\n";
+        exit(-1);
+    }
+
+    int numberOfUserExercises;
+    in >> numberOfUserExercises;
+    for(int itr = 0; itr < numberOfUserExercises; itr++){
+        std::string currentExerciseName;
+        in >> currentExerciseName;
+        //exerciseType::incrementNumberOfExercises();
         exerciseType * newEntry = new exerciseType(currentExerciseName);
 
         int numberOfRecords;
@@ -147,9 +164,15 @@ void getExerciseMap(std::istream &in, std::map<std::string, exerciseType*> &exer
     }
 }
 
+void outputClientsLogs(std::ostream& out, std::vector<Client> clients){
+    for(int i = 0; i < clients.size(); i++){
+        out << clients[i].getName() << ' ' << clients[i].getPassword() << "\n";
+    }
+}
+
 void outputClientsList(std::ostream& out, std::vector<Client> clients){
     for(int i = 0; i < clients.size(); i++){
-        out << clients[i] << "\n";
+        out << (i + 1) << ". " << clients[i] << "\n";
     }
 }
 
@@ -167,12 +190,82 @@ int main()
     getClientsList(finClients, clients);
     finClients.close();
 
+    std::cout << "List of clients:" << "\n";
+    outputClientsList(std::cout, clients);
 
+    bool newUserFlag = false;
+    std::cout << "username = ";
+    std::string username;
+    std::cin >> username;
+
+    int clientID = -1;
+    for(int i = 0; i < clients.size(); i++){
+        if(clients[i].getName() == username){
+            clientID = i;
+            break;
+        }
+    }
+
+    if(clientID == -1){
+        std::cout << "Would you like to register? (y/n)" << "\n";
+        char userChoice;
+        std::cin >> userChoice;
+
+        if(!(userChoice == 'y' || userChoice == 'n')){
+            std::cout << "Invalid choice!" << "\n";
+            return -1;
+        }
+
+        if(userChoice == 'n'){
+            std::cout << "Program terminated.";
+            return 0;
+        }
+        else {
+            newUserFlag = true;
+
+            Client newClient(username);
+            std::cout << "new password = ";
+            std::string password;
+            std::cin >> password;
+            newClient.setPassword(password);
+            clients.push_back(newClient);
+
+            std::ofstream foutClientsAppend ("clients.txt", std::ios::app);
+            foutClientsAppend << username << ' ' << password << "\n";
+            foutClientsAppend.close();
+
+            std::ofstream foutExercisesAppend ("exercises.txt", std::ios::app);
+            foutExercisesAppend << username << "\n";
+            foutExercisesAppend << 0 << "\n";
+            foutExercisesAppend.close();
+        }
+    }
+    else {
+        std::cout << "password = ";
+        std::string password;
+        std::cin >> password;
+
+        if(password != clients[clientID].getPassword()){
+            std::cout << "Invalid Password!\n";
+            return -1;
+        }
+
+    }
+
+    //std::cout << Client::returnTestID();
     std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << "\n";
     std::cout << "!!Disclaimer: please use the singular form for each exercise         !!" << "\n";
     std::cout << "!!For example: \"dip\" and \"dips\" are registered as different exercises!!" << "\n";
     std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << "\n";
     std::cout << "\n";
+
+    if(newUserFlag) {
+        std::cout << "~~Welcome, ";
+    }
+    else {
+        std::cout << "~~Welcome back, ";
+    }
+    std::cout << username << "!" << "~~" << "\n";
 
     int userCurrentChoice = 0;
     ///cute little menu implementation
@@ -180,10 +273,13 @@ int main()
     ///updateInput(fin);
 
     std::map<std::string, exerciseType*> exerciseMap;
-    getExerciseMap(finExercises, exerciseMap);
+    getExerciseMap(finExercises, exerciseMap, username);
 
     ///std::cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" << "\n";
     std::cout << "Here are your current lifetime records:" << "\n";
+    if(exerciseMap.empty()){
+        std::cout << "No logs detected yet." << "\n";
+    }
     for (auto it : exerciseMap){
         ///std::cout << it.first << "!";
         it.second -> printRecords(std::cout, true);
@@ -192,10 +288,16 @@ int main()
     ///std::cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" << "\n";
     std::cout << "\n";
 
-    printMainScreenOptions(std::cout);
-    std::cin >> userCurrentChoice;
 
-    while(userCurrentChoice == 1 || userCurrentChoice == 2 || userCurrentChoice == 3){
+    do{
+        printMainScreenOptions(std::cout);
+        std::cin >> userCurrentChoice;
+
+        if( !(userCurrentChoice == 1 || userCurrentChoice == 2 || userCurrentChoice == 3) ){
+            std::cout << "Program terminated!" << "\n";
+            break;
+        }
+
         if(userCurrentChoice == 1){
             ///start a new workout
             menuNewWorkout(std::cin, exerciseMap);
@@ -206,6 +308,11 @@ int main()
             std::cin >> userCurrentChoice;
 
             if(userCurrentChoice == 1){
+                if(exerciseMap.size() == 0){
+                    std::cout << "No exercises to delete!" << "\n";
+
+                    continue;
+                }
                 ///delete an exercise altogether
                 printAllExercises(std::cout, exerciseMap);
                 std::cout << "Which exercise do you want to delete? (" << 1 << " to " << exerciseMap.size() << ")" << "\n";
@@ -230,6 +337,12 @@ int main()
             }
             else if(userCurrentChoice == 2){
                 ///modify a certain PR manually
+                if(exerciseMap.size() == 0){
+                    std::cout << "No exercises to modify!" << "\n";
+
+                    continue;
+                }
+
                 printAllExercises(std::cout, exerciseMap);
                 std::cout << "Which exercise do you want to update? (" << 1 << " to " << exerciseMap.size() << ")" << "\n";
 
@@ -265,16 +378,16 @@ int main()
         }
         else if(userCurrentChoice == 3){
             ///show current global PRs
-            for (auto it : exerciseMap){
+            if(exerciseMap.empty()){
+                std::cout << "No logs detected yet!" << "\n";
+            }
+            else for (auto it : exerciseMap){
                 ///std::cout << it.first << "!";
                 it.second -> printRecords(std::cout, true);
                 ///std::cout << "\n";
             }
         }
-
-        printMainScreenOptions(std::cout);
-        std::cin >> userCurrentChoice;
-    }
+    }while(userCurrentChoice == 1 || userCurrentChoice == 2 || userCurrentChoice == 3);
 
     finExercises.close();
 
@@ -284,7 +397,7 @@ int main()
 
 
     std::ofstream foutClients("clients.txt");
-    outputClientsList(foutClients, clients);
+    outputClientsLogs(foutClients, clients);
     foutClients.close();
     return 0;
 }

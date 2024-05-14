@@ -7,21 +7,41 @@
 namespace workoutDiary{
     ///exceptions
     class exceptionDate : public std::exception{
+        private:
+            char * message = "Invalid Date! Try again.";
         public:
             char * what(){
-                return "Invalid Date! Try again.";
+                return message;
             }
     };
 
     ///the rest
     class Person{
         private:
+            static int numberOfPersons;
             std::string name;
         public:
             Person() = default;
 
             Person(std::string newName){
                 name = newName;
+            }
+
+            std::string getName(){
+                return name;
+            }
+
+            static void setNumberOfPersons(int x){
+                numberOfPersons = x;
+            }
+            static void incNumberOfPersons(){
+                numberOfPersons++;
+            }
+            static void defNumberOfPersons(){
+                numberOfPersons--;
+            }
+            static int getNumberOfPersons(){
+                return numberOfPersons;
             }
 
             friend std::ostream& operator << (std::ostream& out, const Person& X){
@@ -33,31 +53,48 @@ namespace workoutDiary{
                 return in;
             }
     };
+    int Person::numberOfPersons = 0;
 
     class Client : public Person{
         private:
-            int id;
+            std::string password;
+            static int testID;
         public:
             Client() = default;
-            Client(std::string newName, int newId) : Person(newName), id(newId){}
+            Client(std::string newName) : Person(newName) {}
+            Client(std::string newName, std::string newPassword) : Person(newName), password(newPassword){}
+
+            std::string getName(){
+                return static_cast<Person&> (*this).getName();
+            }
+            std::string getPassword(){
+                return password;
+            }
+            void setPassword(std::string newPassword){
+                password = newPassword;
+            }
 
             friend std::ostream& operator << (std::ostream& out, const Client & X){
                 out << static_cast<const Person&> (X);
-                out << ' ';
-                out << X.id;
                 return out;
             }
             friend std::istream& operator >> (std::istream& in, Client & X){
                 in >> static_cast<Person&>(X);
-                in >> X.id;
+                in >> X.password;
 
                 return in;
             }
 
+            static int returnTestID(){
+                return testID;
+            }
+
     };
+    int Client::testID = 0;
 
     class exerciseType{
         private:
+            static int numberOfExercises;
             std::string name;
             std::string description;
             std::map<int, int> recordReps;
@@ -73,6 +110,19 @@ namespace workoutDiary{
                 description = newDescription;
             }
             ~exerciseType() = default;
+
+            static void setNumberOfExercises(int newNumberOfExercises){
+                numberOfExercises = newNumberOfExercises;
+            }
+            static void incrementNumberOfExercises(){
+                numberOfExercises = numberOfExercises + 1;
+            }
+            static void decrementNumberOfExercises(){
+                numberOfExercises = numberOfExercises - 1;
+            }
+            static int getNumberOfExercises(){
+                return numberOfExercises;
+            }
 
             std::string getName(){
                 return name;

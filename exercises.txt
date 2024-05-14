@@ -1,14 +1,16 @@
+mihai
+2
 pullup
-3
+1
 80 10
-100 6
-110 2
 pushup
-3
-80 40
-90 25
-100 10
-dip
 2
 80 20
 90 10
+bianca
+1
+squat
+1
+50 100
+user3
+0
