@@ -127,40 +127,33 @@ void getClientsList(std::istream &in, std::vector<Client> &clients){
     }
 }
 
-void getExerciseMap(std::istream &in, std::map<std::string, exerciseType*> &exerciseMap, std::string username){
+void getExerciseMap(std::istream &in, std::map< std::string, std::map<std::string, exerciseType*> > &exerciseMap){
     std::string currentUsername;
-    in >> currentUsername;
-    while(currentUsername != username){
-        in >> currentUsername;
-    }
-    if(currentUsername != username){
-        std::cout << "No exercises found!" << "\n";
-        exit(-1);
-    }
+    while(in >> currentUsername){
+        int numberOfUserExercises;
+        in >> numberOfUserExercises;
+        for(int itr = 0; itr < numberOfUserExercises; itr++){
+            std::string currentExerciseName;
+            in >> currentExerciseName;
+            //exerciseType::incrementNumberOfExercises();
+            exerciseType * newEntry = new exerciseType(currentExerciseName);
 
-    int numberOfUserExercises;
-    in >> numberOfUserExercises;
-    for(int itr = 0; itr < numberOfUserExercises; itr++){
-        std::string currentExerciseName;
-        in >> currentExerciseName;
-        //exerciseType::incrementNumberOfExercises();
-        exerciseType * newEntry = new exerciseType(currentExerciseName);
+            int numberOfRecords;
+            in >> numberOfRecords;
+            for(int i = 0; i < numberOfRecords; i++){
+                int weight;
+                in >> weight;
 
-        int numberOfRecords;
-        in >> numberOfRecords;
-        for(int i = 0; i < numberOfRecords; i++){
-            int weight;
-            in >> weight;
+                int reps;
+                in >> reps;
 
-            int reps;
-            in >> reps;
+                newEntry -> tryUpdatePR(weight, reps);
+            }
 
-            newEntry -> tryUpdatePR(weight, reps);
+
+            ///we built newEntry; now we add it to the exerciseMap
+            exerciseMap[currentUsername][currentExerciseName] = newEntry;
         }
-
-
-        ///we built newEntry; now we add it to the exerciseMap
-        exerciseMap[currentExerciseName] = newEntry;
     }
 }
 
@@ -176,15 +169,33 @@ void outputClientsList(std::ostream& out, std::vector<Client> clients){
     }
 }
 
-void outputExerciseMap(std::ostream& out, std::map<std::string, exerciseType*> const & exerciseMap){
-    for (auto it : exerciseMap){
-        out << (it.second) -> getName() << "\n";
-        (it.second) -> printRecords(out, false);
+void outputExerciseMap(std::ostream& out, std::map<std::string, std::map<std::string, exerciseType*> > const & exerciseMap){
+    for (auto itName : exerciseMap){
+        out << itName.first << "\n";
+        out << itName.second.size() << "\n";
+        for(auto itExercise : itName.second){
+            out << (itExercise.second) -> getName() << "\n";
+            (itExercise.second) -> printRecords(out, false);
+        }
     }
 }
 
 int main()
 {
+    std::ifstream finManagers("managers.txt");
+    std::string managerName;
+    std::string managerEmail;
+    while(finManagers >> managerName){
+        finManagers >> managerEmail;
+        //Manager* tmp = new Manager();
+        //tmp -> display(cout);
+        std::cout << "\n";
+
+        //delete tmp;
+    }
+    finManagers.close();
+
+
     std::ifstream finClients("clients.txt");
     std::vector<Client> clients;
     getClientsList(finClients, clients);
@@ -265,22 +276,25 @@ int main()
     else {
         std::cout << "~~Welcome back, ";
     }
-    std::cout << username << "!" << "~~" << "\n";
+    std::cout << clients[clientID].getName() << "!" << "~~" << "\n";
 
     int userCurrentChoice = 0;
     ///cute little menu implementation
     std::ifstream finExercises ("exercises.txt");
     ///updateInput(fin);
 
-    std::map<std::string, exerciseType*> exerciseMap;
-    getExerciseMap(finExercises, exerciseMap, username);
+    std::map<std::string, std::map<std::string, exerciseType*> > exerciseMap;
+    for (auto it : clients){
+        exerciseMap[ it.getName() ]; ///initialise exerciseMap even on those clients who haven't done any exercises yet
+    }
+    getExerciseMap(finExercises, exerciseMap);
 
     ///std::cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" << "\n";
     std::cout << "Here are your current lifetime records:" << "\n";
     if(exerciseMap.empty()){
         std::cout << "No logs detected yet." << "\n";
     }
-    for (auto it : exerciseMap){
+    for (auto it : exerciseMap[ clients[clientID].getName() ]){
         ///std::cout << it.first << "!";
         it.second -> printRecords(std::cout, true);
         ///std::cout << "\n";
@@ -300,7 +314,7 @@ int main()
 
         if(userCurrentChoice == 1){
             ///start a new workout
-            menuNewWorkout(std::cin, exerciseMap);
+            menuNewWorkout(std::cin, exerciseMap[ clients[clientID].getName() ]);
         }
         else if(userCurrentChoice == 2){
             ///modify records
@@ -314,7 +328,7 @@ int main()
                     continue;
                 }
                 ///delete an exercise altogether
-                printAllExercises(std::cout, exerciseMap);
+                printAllExercises(std::cout, exerciseMap[ clients[clientID].getName() ]);
                 std::cout << "Which exercise do you want to delete? (" << 1 << " to " << exerciseMap.size() << ")" << "\n";
 
                 int indexToDelete;
@@ -325,13 +339,13 @@ int main()
                 }
 
 
-                auto iteratorToDelete = exerciseMap.begin();
+                auto iteratorToDelete = exerciseMap[ clients[clientID].getName() ].begin();
                 for(int times = 1; times <= indexToDelete - 1; times++){
                     iteratorToDelete++;
                 }
                 std::cout << "***" << iteratorToDelete -> first << " deleted succesfully!***" << "\n" << "\n";
                 delete iteratorToDelete -> second; ///free up memory
-                exerciseMap.erase(iteratorToDelete);
+                exerciseMap[ clients[clientID].getName() ].erase(iteratorToDelete);
 
 
             }
@@ -343,7 +357,7 @@ int main()
                     continue;
                 }
 
-                printAllExercises(std::cout, exerciseMap);
+                printAllExercises(std::cout, exerciseMap[ clients[clientID].getName()]);
                 std::cout << "Which exercise do you want to update? (" << 1 << " to " << exerciseMap.size() << ")" << "\n";
 
                 int indexToUpdate;
@@ -354,7 +368,7 @@ int main()
                 }
 
 
-                auto iteratorToUpdate = exerciseMap.begin();
+                auto iteratorToUpdate = exerciseMap[ clients[clientID].getName() ].begin();
                 for(int times = 1; times <= indexToUpdate - 1; times++){
                     iteratorToUpdate++;
                 }
@@ -381,7 +395,7 @@ int main()
             if(exerciseMap.empty()){
                 std::cout << "No logs detected yet!" << "\n";
             }
-            else for (auto it : exerciseMap){
+            else for (auto it : exerciseMap[ clients[clientID].getName() ]){
                 ///std::cout << it.first << "!";
                 it.second -> printRecords(std::cout, true);
                 ///std::cout << "\n";

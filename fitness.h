@@ -49,6 +49,10 @@ namespace workoutDiary{
             virtual void setPassword(const std::string &newPassword) = 0;
             virtual std::string getPassword() const = 0;
 
+            virtual void display(std::ostream & out) const{
+                out << "Persoana " << name;
+            }
+
             friend std::ostream& operator << (std::ostream& out, const Person& X){
                 out << X.name;
                 return out;
@@ -82,6 +86,10 @@ namespace workoutDiary{
                 return password;
             }
 
+            virtual void display(std::ostream& out) const override{
+                ///out << "Client " << static_cast<Person&>(*this).getName();
+            }
+
             friend std::ostream& operator << (std::ostream& out, const Client & X){
                 out << static_cast<const Person&> (X);
                 return out;
@@ -98,6 +106,38 @@ namespace workoutDiary{
                 out << ' ' ;
                 out << password;
             }
+
+    };
+
+    class Manager : public Person{
+        private:
+            std::string email;
+        public:
+            Manager() = default;
+            Manager(std::string newName) : Person(newName) {}
+            Manager(std::string newName, std::string newEmail) : Person(newName), email(newEmail) {}
+
+            std::string getName(){
+                return static_cast<Person&> (*this).getName();
+            }
+            void setEmail(const std::string& newEmail){
+                email = newEmail;
+            }
+            std::string getEmail(){
+                return email;
+            }
+
+            friend std::ostream& operator << (std::ostream& out, const Manager & X){
+                out << static_cast<const Person&> (X);
+                return out;
+            }
+            friend std::istream& operator >> (std::istream& in, Manager & X){
+                in >> static_cast<Person&>(X);
+                in >> X.email;
+
+                return in;
+            }
+
 
     };
 
