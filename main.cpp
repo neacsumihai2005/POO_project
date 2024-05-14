@@ -2,8 +2,10 @@
 #include <fstream>
 #include <assert.h>
 #include <exception>
+#include <ctime>
 
 #include "fitness.h"
+#include "MOTD.h"
 
 using namespace workoutDiary;
 
@@ -182,6 +184,21 @@ void outputExerciseMap(std::ostream& out, std::map<std::string, std::map<std::st
 
 int main()
 {
+    const std::time_t now = std::time(nullptr);
+    const std::tm calendar_time = *std::localtime( std::addressof(now) );
+    MOTDProvider * provider; ///base class pointer
+    if(calendar_time.tm_hour <= 12){
+        ///morning MOTD
+        provider = new MorningMOTD();
+    } ///upcasting #1
+    else {
+        ///evening MOTD
+        provider = new EveningMOTD();
+    } ///upcasting #2
+    std::cout << "Message of the day:" << "\n";
+    std::cout << provider -> getMOTD() << "\n" << "\n";
+
+    /*
     std::ifstream finManagers("managers.txt");
     std::string managerName;
     std::string managerEmail;
@@ -194,6 +211,7 @@ int main()
         //delete tmp;
     }
     finManagers.close();
+    */
 
 
     std::ifstream finClients("clients.txt");
