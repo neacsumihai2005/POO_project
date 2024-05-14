@@ -2,6 +2,9 @@
 
 class MOTDProvider{
     public:
+        std::string getIntro(){
+            return "Message of the day";
+        }
         virtual std::string getMOTD() const = 0;
         virtual ~MOTDProvider() {} //Virtual destructor for polymorphic behavior
 };

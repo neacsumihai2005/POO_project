@@ -186,16 +186,18 @@ int main()
 {
     const std::time_t now = std::time(nullptr);
     const std::tm calendar_time = *std::localtime( std::addressof(now) );
+
+    ///upcasting and dynamic dispatch:
     MOTDProvider * provider; ///base class pointer
     if(calendar_time.tm_hour <= 12){
         ///morning MOTD
         provider = new MorningMOTD();
-    } ///upcasting #1
+    }
     else {
         ///evening MOTD
         provider = new EveningMOTD();
-    } ///upcasting #2
-    std::cout << "Message of the day:" << "\n";
+    }
+    std::cout << provider -> getIntro() << "\n";
     std::cout << provider -> getMOTD() << "\n" << "\n";
 
     /*
