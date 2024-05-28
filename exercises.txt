@@ -1,5 +1,31 @@
+bianca
+4
+jump
+1
+50 10
+pullup
+1
+50 2
+pushup
+1
+50 7
+squat
+1
+50 100
+bula
+0
+gigel
+0
+ion
+0
 mihai
-2
+4
+dip
+1
+90 10
+jump
+1
+90 10
 pullup
 1
 80 10
@@ -7,10 +33,7 @@ pushup
 2
 80 20
 90 10
-bianca
-1
-squat
-1
-50 100
+strula
+0
 user3
 0

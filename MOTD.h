@@ -1,5 +1,3 @@
-
-
 class MOTDProvider{
     public:
         std::string getIntro(){

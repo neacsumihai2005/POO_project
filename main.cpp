@@ -3,9 +3,13 @@
 #include <assert.h>
 #include <exception>
 #include <ctime>
+#include <random>
 
 #include "fitness.h"
 #include "MOTD.h"
+#include "coinflip.h"
+#include "ColorManager.h"
+#include "clothing.h"
 
 using namespace workoutDiary;
 
@@ -15,6 +19,10 @@ inline void printMainScreenOptions(std::ostream & out){
     out << "~ 1 = start a new workout           ~" << "\n";
     out << "~ 2 = modify records                ~" << "\n";
     out << "~ 3 = print current personal PRs    ~" << "\n";
+    out << "~ 4 = challenge another user        ~" << "\n";
+    out << "~ 5 = randomly change color         ~" << "\n";
+    out << "~ 6 = reset color to white          ~" << "\n";
+    out << "~ 7 = view gym product prices       ~" << "\n";
     out << "~ other number = exit               ~" << "\n";
     out << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << "\n";
 }
@@ -33,6 +41,69 @@ void printAllExercises(std::ostream & out, std::map<std::string, exerciseType*> 
     }
 }
 
+inline int addExercise(std::string const currentExerciseName, std::map<std::string, exerciseType*> &exerciseMap){
+    ///handles the menu for the user when executing an exercise
+    ///returns the PR for repetitions if there is any; 0 otherwise
+
+    exercise * currentExercise = new exercise();
+    exerciseType * currentExerciseType;
+
+    ///this might be a new exercise, so we verify that
+    if(exerciseMap.find(currentExerciseName) == exerciseMap.end()){
+        currentExerciseType = new exerciseType(currentExerciseName);
+        exerciseMap[currentExerciseName] = currentExerciseType;
+
+        std::cout << "New exercise for you detected!" << "\n";
+        std::cout << "Would you like to add a personal description? (y/n)" << "\n";
+
+        char userChoice;
+        std::cin >> userChoice;
+        if( !(userChoice == 'n' || userChoice == 'y') ){
+            throw(std::runtime_error("Invalid choice!"));
+        }
+        if(userChoice == 'y'){
+            std::cout << "Description (one liner) = ";
+            std::string newDescription;
+            std::cin.get();
+            std::getline(std::cin, newDescription);
+            currentExerciseType -> setDescription(newDescription);
+        }
+
+    }
+    else {
+        currentExerciseType = exerciseMap[currentExerciseName];
+    }
+
+    std::cout << "Weight (kg) = ";
+    int weight;
+    std::cin >> weight;
+    assert(weight > 0);
+    currentExercise -> setWeight(weight);
+
+    std::cout << "Reps = ";
+    int reps;
+    std::cin >> reps;
+    int finalPR = 0;
+    while(reps != 0){
+        currentExercise -> addSet(reps);
+
+        int previousPR = currentExerciseType -> getPR(weight);
+        currentExerciseType -> tryUpdatePR(weight, reps);
+        int potentialPR = currentExerciseType -> getPR(weight);
+
+        if(potentialPR > previousPR){
+            std::cout << "Congratulations! You just hit a PR! Old PR was " << previousPR << " reps!" << "\n";
+            finalPR = potentialPR;
+        }
+
+        std::cout << "Reps = ";
+        std::cin >> reps;
+        assert(reps >= 0);
+    }
+
+    return finalPR;
+}
+
 inline void menuNewWorkout(std::istream& in, std::map<std::string, exerciseType*> &exerciseMap){
     calendaristicDate currentDate;
     std::cin >> currentDate;
@@ -47,60 +118,7 @@ inline void menuNewWorkout(std::istream& in, std::map<std::string, exerciseType*
             std::cin >> currentExerciseName;
 
             while(currentExerciseName != "stop"){
-                exercise * currentExercise = new exercise();
-                exerciseType * currentExerciseType;
-
-                ///this might be a new exercise, so we verify that
-                if(exerciseMap.find(currentExerciseName) == exerciseMap.end()){
-                    currentExerciseType = new exerciseType(currentExerciseName);
-                    exerciseMap[currentExerciseName] = currentExerciseType;
-
-                    std::cout << "New exercise for you detected!" << "\n";
-                    std::cout << "Would you like to add a personal description? (y/n)" << "\n";
-
-                    char userChoice;
-                    std::cin >> userChoice;
-                    if( !(userChoice == 'n' || userChoice == 'y') ){
-                        throw(std::runtime_error("Invalid choice!"));
-                    }
-                    if(userChoice == 'y'){
-                        std::cout << "Description (one liner) = ";
-                        std::string newDescription;
-                        std::cin.get();
-                        std::getline(std::cin, newDescription);
-                        currentExerciseType -> setDescription(newDescription);
-                    }
-
-                }
-                else {
-                    currentExerciseType = exerciseMap[currentExerciseName];
-                }
-
-                std::cout << "Weight (kg) = ";
-                int weight;
-                std::cin >> weight;
-                assert(weight > 0);
-                currentExercise -> setWeight(weight);
-
-                std::cout << "Reps = ";
-                int reps;
-                std::cin >> reps;
-                assert(reps > 0);
-                while(reps != 0){
-                    currentExercise -> addSet(reps);
-
-                    int previousPR = currentExerciseType -> getPR(weight);
-                    currentExerciseType -> tryUpdatePR(weight, reps);
-                    int potentialPR = currentExerciseType -> getPR(weight);
-
-                    if(potentialPR > previousPR){
-                        std::cout << "Congratulations! You just hit a PR! Old PR was " << previousPR << " reps!" << "\n";
-                    }
-
-                    std::cout << "Reps = ";
-                    std::cin >> reps;
-                    assert(reps >= 0);
-                }
+                addExercise(currentExerciseName, exerciseMap);
 
                 std::cout << "Exercise = ";
                 std::cin >> currentExerciseName;
@@ -182,8 +200,19 @@ void outputExerciseMap(std::ostream& out, std::map<std::string, std::map<std::st
     }
 }
 
+int getRandomNumber(int st, int dr) {
+    static std::random_device rd;  // Declare random device as static
+    static std::mt19937 eng(rd()); // Declare Mersenne Twister engine as static
+    static std::uniform_int_distribution<> distr(st, dr); // Declare distribution as static
+
+    return distr(eng); // Generate and return a random number
+}
+
 int main()
 {
+    // Initializing static member instance to nullptr
+    ConsoleColorManager* colorManager = ConsoleColorManager::getInstance();
+
     const std::time_t now = std::time(nullptr);
     const std::tm calendar_time = *std::localtime( std::addressof(now) );
 
@@ -260,6 +289,7 @@ int main()
             std::cin >> password;
             newClient.setPassword(password);
             clients.push_back(newClient);
+            clientID = clients.size() - 1;
 
             std::ofstream foutClientsAppend ("clients.txt", std::ios::app);
             foutClientsAppend << username << ' ' << password << "\n";
@@ -327,7 +357,7 @@ int main()
         printMainScreenOptions(std::cout);
         std::cin >> userCurrentChoice;
 
-        if( !(userCurrentChoice == 1 || userCurrentChoice == 2 || userCurrentChoice == 3) ){
+        if( !(1 <= userCurrentChoice && userCurrentChoice <= 7) ){
             std::cout << "Program terminated!" << "\n";
             break;
         }
@@ -421,7 +451,152 @@ int main()
                 ///std::cout << "\n";
             }
         }
-    }while(userCurrentChoice == 1 || userCurrentChoice == 2 || userCurrentChoice == 3);
+        else if(userCurrentChoice == 4){
+            if(clients.size() == 1){ ///at all times there is at least one client; but if it's the only client, he has no one to challenge :(
+                std::cout << "No clients to challenge besides you!" << "\n";
+                continue;
+            }
+
+            for(int i = 0; i < clients.size(); i++){
+                std::cout << (i + 1) << ". " << clients[i].getName() << "\n";
+            }
+            std::cout << "Which user would you like to challenge? (1 to " << clients.size() << ")" << "\n";
+            int indexToChallenge;
+            std::cout << "Number = ";
+            std::cin >> indexToChallenge;
+            while( ! (1 <= indexToChallenge && indexToChallenge <= clients.size()) || indexToChallenge == clientID + 1){
+                if( ! (1 <= indexToChallenge && indexToChallenge <= clients.size()) ){
+                    std::cout << "Invalid number! Try again." << "\n";
+                }
+                else {
+                    std::cout << "Can't challenge yourself! Try again." << "\n";
+                }
+                std::cout << "Number = ";
+                std::cin >> indexToChallenge;
+            }
+
+            std::cout << "User " << clients[indexToChallenge - 1].getName() << ", please enter your password:\npassword = ";
+            std::string challengedPassword;
+            std::cin >> challengedPassword;
+
+            if(challengedPassword != clients[indexToChallenge - 1].getPassword()){
+                std::cout << "Invalid Password!" << "\n";
+                continue;
+            }
+
+
+            std::cout << "What challenge do you want to partake in?" << "\n";
+            std::cout << "1. Workout challenge!" << "\n";
+            std::cout << "2. (fun) Coin flip!" << "\n";
+
+            int indexChallenge;
+            std::cin >> indexChallenge;
+            while( ! (1 <= indexChallenge && indexChallenge <= 2) ){
+                std::cout << "Invalid number! Try again. " << "\n";
+                std::cin >> indexChallenge;
+            }
+
+            if(indexChallenge == 1){
+                std::cout << "Exercise = ";
+                std::string currentExerciseName;
+                std::cin >> currentExerciseName;
+                std::cout << "Rules:" << "\n";
+                std::cout << "*If someone hits a new rep PR, the person wins" << "\n";
+                std::cout << "*If both hit a PR, or none hit a PR, it's a draw" << "\n";
+
+                std::cout << clients[clientID].getName() << "'s turn" << "\n";
+                int resultPlayerOne = addExercise(currentExerciseName, exerciseMap[ clients[clientID].getName() ]);
+
+                std::cout << clients[indexToChallenge - 1].getName() << "'s turn" << "\n";
+                int resultPlayerTwo = addExercise(currentExerciseName, exerciseMap[ clients[indexToChallenge - 1].getName() ]);
+
+
+                if((resultPlayerOne != 0 && resultPlayerTwo != 0) || (resultPlayerOne == 0 && resultPlayerTwo == 0)){
+                    std::cout << "Congratulations! It is a draw" << "\n";
+                }
+                else {
+                    if(resultPlayerOne != 0){
+                        std::cout << clients[clientID].getName() << " wins! Better luck next time, " << clients[indexToChallenge - 1].getName() << " :(" << "\n";
+                    }
+                    else {
+                        std::cout << clients[indexToChallenge - 1].getName() << " wins! Better luck next time, " << clients[clientID].getName() << " :( " << "\n";
+                    }
+                }
+            }
+            else if(indexChallenge == 2){
+                ///Coin Flip
+
+                Coin coin;
+                Player player1("Player " + clients[clientID].getName());
+                Player player2("Player " + clients[indexToChallenge - 1].getName());
+
+                coin.attach(&player1);
+                coin.attach(&player2);
+
+                std::cout << "Let's flip the coin!" << "\n";
+                coin.flip();
+
+                coin.detach(&player2);
+                std::cout << "Removed " << clients[indexToChallenge - 1].getName() << " from observers!" << "\n";
+                std::cout << "Let's flip the coin again!" << "\n";
+                coin.flip();
+            }
+
+
+            ///verify if this exercise exists for players 1 and 2
+            ///and if not; create it for each individual where it may be the case
+        }
+        else if(userCurrentChoice == 5){
+            colorManager->setConsoleColor( getRandomNumber(2, 14) ); // Generate and return a random number
+        }
+        else if(userCurrentChoice == 6){
+            colorManager->setConsoleColor(7);
+        }
+        else if(userCurrentChoice == 7){
+            std::cout << "Enter the article you want to calculate the price of (Tshirt, Shorts, Shoes)" << "\n";
+            std::cout << "Article = ";
+            std::string clothType;
+            std::cin >> clothType;
+            std::transform(clothType.begin(), clothType.end(), clothType.begin(),
+                // static_cast<int(*)(int)>(std::toupper)         // wrong
+                // [](int c){ return std::toupper(c); }           // wrong
+                // [](char c){ return std::toupper(c); }          // wrong
+                   [](unsigned char c){ return std::tolower(c); } // correct
+                  );
+
+            std::unique_ptr<Cloth> cloth = ClothFactory::createCloth(clothType);
+            if(cloth == nullptr){
+                std::cout << "Invalid article type!" << "\n";
+                continue;
+            }
+            std::cout << "Please enter a size (XS, S, M, L, XL, XXL)" << "\n";
+            std::cout << "Size = ";
+            std::string userSize;
+            std::cin >> userSize;
+            std::transform(userSize.begin(), userSize.end(), userSize.begin(),
+                // static_cast<int(*)(int)>(std::toupper)         // wrong
+                // [](int c){ return std::toupper(c); }           // wrong
+                // [](char c){ return std::toupper(c); }          // wrong
+                   [](unsigned char c){ return std::toupper(c); } // correct
+                  );
+            if(!(
+                 userSize == "XS" ||
+                 userSize == "S" ||
+                 userSize == "M" ||
+                 userSize == "L" ||
+                 userSize == "XL" ||
+                 userSize == "XXL"
+                 )){
+                    std::cout << "Invalid size!" << "\n";
+                    continue;
+            }
+
+
+            std::cout << "The price is: " << cloth->getPrice(userSize) << " lei" << "\n";
+
+
+        }
+    }while( 1 <= userCurrentChoice && userCurrentChoice <= 7 );
 
     finExercises.close();
 
