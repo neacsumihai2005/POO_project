@@ -3,6 +3,27 @@
 // Forward declaration of Observer interface
 class Observer;
 
+class ChatConnection {
+    private:
+        std::string playerOne;
+        std::string playerTwo;
+
+    public:
+        ChatConnection(std::string const &newPlayerOne, std::string const &newPlayerTwo) {
+            playerOne = newPlayerOne;
+            playerTwo = newPlayerTwo;
+            std::cout << "Established one-end connection from " << playerOne << " to " << playerTwo << "!\n";
+        }
+        ~ChatConnection() {
+            std::cout << "Chat connection ended on both ends!" << "\n";
+        }
+
+        void sendMessage(std::string const &user, std::string const &message){
+            std::cout << user << ": \" " << message << " \" \n";
+        }
+};
+
+
 // Subject interface
 class Subject{
     public:

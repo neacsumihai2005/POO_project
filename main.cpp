@@ -13,7 +13,6 @@
 
 using namespace workoutDiary;
 
-
 inline void printMainScreenOptions(std::ostream & out){
     out << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << "\n";
     out << "~ 1 = start a new workout           ~" << "\n";
@@ -207,6 +206,34 @@ int getRandomNumber(int st, int dr) {
 
     return distr(eng); // Generate and return a random number
 }
+void loadingBar()
+{
+    // Initialize char for printing
+    // loading bar
+    char a = 177, b = 219;
+
+    std::cout << "\n\n\n\t\t\t\t\t";
+    std::cout << "Loading...\n\n";
+    std::cout << "\t\t\t\t\t";
+
+    // Print initial loading bar
+    for (int i = 0; i < 26; i++)
+        std::cout << a;
+
+    // Set the cursor again starting
+    // point of loading bar
+    std::cout << "\r";
+    std::cout << "\t\t\t\t\t";
+
+    // Print loading bar progress
+    for (int i = 0; i < 26; i++) {
+        std::cout << b;
+
+        // Sleep for 50 ms
+        Sleep(50);
+    }
+    std::cout << "\n\n\n\n";
+}
 
 int main()
 {
@@ -312,6 +339,7 @@ int main()
         }
 
     }
+    loadingBar();
 
     //std::cout << Client::returnTestID();
     std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << "\n";
@@ -530,15 +558,43 @@ int main()
                 Player player1("Player " + clients[clientID].getName());
                 Player player2("Player " + clients[indexToChallenge - 1].getName());
 
+                std::shared_ptr<ChatConnection> playerOneConnection = std::make_shared<ChatConnection> (clients[clientID].getName(),
+                                                                                                        clients[indexToChallenge - 1].getName());
+                std::shared_ptr<ChatConnection> playerTwoConnection = playerOneConnection;
+
+                std::cout << clients[clientID].getName() << ", send a message for " << clients[indexToChallenge - 1].getName() << " (max 50 char)" << "\n";
+                std::string chatmessage;
+                std::cin.get();
+                std::getline(std::cin, chatmessage);
+                playerOneConnection -> sendMessage(clients[clientID].getName(), chatmessage);
+
+                std::cout << clients[indexToChallenge - 1].getName() << ", send a message for " << clients[clientID].getName() << " (max 50 char)" << "\n";
+                std::getline(std::cin, chatmessage);
+                playerTwoConnection -> sendMessage(clients[indexToChallenge - 1].getName(), chatmessage);
+
                 coin.attach(&player1);
                 coin.attach(&player2);
 
-                std::cout << "Let's flip the coin!" << "\n";
+                std::cout << "Let's flip the coin! Press y to continue" << "\n";
+                char userAccept;
+                std::cin >> userAccept;
+                if(userAccept != 'y'){
+                    std::cout << "Not this time!" << "\n";
+                    continue;
+                }
+
                 coin.flip();
 
                 coin.detach(&player2);
-                std::cout << "Removed " << clients[indexToChallenge - 1].getName() << " from observers!" << "\n";
-                std::cout << "Let's flip the coin again!" << "\n";
+                std::cout << "Removing " << clients[indexToChallenge - 1].getName() << " from observers!" << "\n";
+                loadingBar();
+                std::cout << "Let's flip the coin again! Press y to continue" << "\n";
+                std::cin >> userAccept;
+                if(userAccept != 'y'){
+                    std::cout << "Not this time!" << "\n";
+                    continue;
+                }
+
                 coin.flip();
             }
 
