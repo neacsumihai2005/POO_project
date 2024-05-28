@@ -13,6 +13,10 @@ Upon running the main.cpp, the user will be prompted with a message of the day t
     3. modify a certain PR manually
         1. user will be prompted with on-screen instructions
 3. print current global PRs
+4. challenge another user to either an exercise or a coin flip
+5. randomly change the console color
+6. revert the color change
+7. inspect the price of some of the clothes for sale at the gym
 
 The program notifies the user when he hits a new PR with a console message.
 
