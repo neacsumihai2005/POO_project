@@ -369,7 +369,7 @@ int main()
 
     ///std::cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" << "\n";
     std::cout << "Here are your current lifetime records:" << "\n";
-    if(exerciseMap.empty()){
+    if(exerciseMap[ clients[clientID].getName() ].empty()){
         std::cout << "No logs detected yet." << "\n";
     }
     for (auto it : exerciseMap[ clients[clientID].getName() ]){
@@ -400,19 +400,19 @@ int main()
             std::cin >> userCurrentChoice;
 
             if(userCurrentChoice == 1){
-                if(exerciseMap.size() == 0){
+                if(exerciseMap[ clients[clientID].getName() ].size() == 0){
                     std::cout << "No exercises to delete!" << "\n";
 
                     continue;
                 }
                 ///delete an exercise altogether
                 printAllExercises(std::cout, exerciseMap[ clients[clientID].getName() ]);
-                std::cout << "Which exercise do you want to delete? (" << 1 << " to " << exerciseMap.size() << ")" << "\n";
+                std::cout << "Which exercise do you want to delete? (" << 1 << " to " << exerciseMap[ clients[clientID].getName() ].size() << ")" << "\n";
 
                 int indexToDelete;
                 std::cout << "Number = ";
                 std::cin >> indexToDelete;
-                if( ! (1 <= indexToDelete && indexToDelete <= exerciseMap.size()) ){
+                if( ! (1 <= indexToDelete && indexToDelete <= exerciseMap[ clients[clientID].getName() ].size()) ){
                     throw(std::runtime_error("Invalid number!"));
                 }
 
@@ -429,19 +429,19 @@ int main()
             }
             else if(userCurrentChoice == 2){
                 ///modify a certain PR manually
-                if(exerciseMap.size() == 0){
+                if(exerciseMap[ clients[clientID].getName() ].size() == 0){
                     std::cout << "No exercises to modify!" << "\n";
 
                     continue;
                 }
 
                 printAllExercises(std::cout, exerciseMap[ clients[clientID].getName()]);
-                std::cout << "Which exercise do you want to update? (" << 1 << " to " << exerciseMap.size() << ")" << "\n";
+                std::cout << "Which exercise do you want to update? (" << 1 << " to " << exerciseMap[ clients[clientID].getName() ].size() << ")" << "\n";
 
                 int indexToUpdate;
                 std::cout << "Number = ";
                 std::cin >> indexToUpdate;
-                if( ! (1 <= indexToUpdate && indexToUpdate <= exerciseMap.size()) ){
+                if( ! (1 <= indexToUpdate && indexToUpdate <= exerciseMap[ clients[clientID].getName() ].size()) ){
                     throw(std::runtime_error("Invalid number!"));
                 }
 
@@ -470,7 +470,7 @@ int main()
         }
         else if(userCurrentChoice == 3){
             ///show current global PRs
-            if(exerciseMap.empty()){
+            if(exerciseMap[ clients[clientID].getName() ].size() == 0){
                 std::cout << "No logs detected yet!" << "\n";
             }
             else for (auto it : exerciseMap[ clients[clientID].getName() ]){
